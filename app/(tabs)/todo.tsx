@@ -1,35 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
-import { Feather } from '@expo/vector-icons'; // Icons for enhanced visuals
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { db } from './firebaseConfig';
-import { collection, addDoc, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 
 export default function TodoScreen() {
   const [task, setTask] = useState('');
   const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
-    // Real-time listener for Firestore
     const unsubscribe = onSnapshot(collection(db, 'todos'), (snapshot) => {
       const tasksData = [];
       snapshot.forEach((doc) => {
         tasksData.push({ id: doc.id, ...doc.data() });
       });
       setTasks(tasksData);
+      setLoading(false); // Set loading to false after data is fetched
     });
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
   const addTask = async () => {
     if (task.trim().length > 0) {
       try {
-        await addDoc(collection(db, 'todos'), { value: task });
+        await addDoc(collection(db, 'todos'), { value: task, completed: false });
         setTask(''); // Clear input after adding
       } catch (error) {
-        console.error('Error adding task: ', error);
+        Alert.alert('Error', 'Error adding task: ' + error.message);
       }
+    } else {
+      Alert.alert('Warning', 'Task cannot be empty!');
     }
   };
 
@@ -37,7 +39,16 @@ export default function TodoScreen() {
     try {
       await deleteDoc(doc(db, 'todos', id));
     } catch (error) {
-      console.error('Error deleting task: ', error);
+      Alert.alert('Error', 'Error deleting task: ' + error.message);
+    }
+  };
+
+  const toggleComplete = async (id, completed) => {
+    try {
+      const taskDoc = doc(db, 'todos', id);
+      await updateDoc(taskDoc, { completed: !completed });
+    } catch (error) {
+      Alert.alert('Error', 'Error updating task: ' + error.message);
     }
   };
 
@@ -53,28 +64,37 @@ export default function TodoScreen() {
           placeholderTextColor="#aaa"
           value={task}
           onChangeText={setTask}
+          onSubmitEditing={addTask} // Dismiss keyboard on submit
+          returnKeyType="done" // Show "done" on keyboard
         />
         <TouchableOpacity style={styles.addButton} onPress={addTask}>
           <Feather name="plus" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
-      {/* Task List */}
-      <FlatList
-        data={tasks}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.taskContainer}>
-            <Text style={styles.taskText}>{item.value}</Text>
-            <TouchableOpacity onPress={() => deleteTask(item.id)} style={styles.deleteButton}>
-              <Feather name="trash-2" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No tasks yet. Add some to get started!</Text>
-        }
-      />
+      {/* Loading Indicator */}
+      {loading ? (
+        <ActivityIndicator size="large" color="#3b82f6" />
+      ) : (
+        <FlatList
+          data={tasks}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={[styles.taskContainer, item.completed && styles.completedTask]}>
+              <TouchableOpacity onPress={() => toggleComplete(item.id, item.completed)} style={styles.checkButton}>
+                <Feather name={item.completed ? "check-circle" : "circle"} size={20} color="#3b82f6" />
+              </TouchableOpacity>
+              <Text style={[styles.taskText, item.completed && styles.completedText]}>{item.value}</Text>
+              <TouchableOpacity onPress={() => deleteTask(item.id)} style={styles.deleteButton}>
+                <Feather name="trash-2" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          )}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>No tasks yet. Add some to get started!</Text>
+          }
+        />
+      )}
     </View>
   );
 }
@@ -134,9 +154,16 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  completedTask: {
+    backgroundColor: '#d1fae5',
+  },
   taskText: {
     fontSize: 18,
     color: '#333',
+  },
+  completedText: {
+    textDecorationLine: 'line-through',
+    color: '#9ca3af',
   },
   deleteButton: {
     backgroundColor: '#ef4444',
@@ -150,5 +177,8 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontSize: 18,
     marginTop: 30,
+  },
+  checkButton: {
+    padding: 5,
   },
 });
