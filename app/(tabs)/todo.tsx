@@ -1,20 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons'; // Icons for enhanced visuals
+import { db } from './firebaseConfig';
+import { collection, addDoc, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 
 export default function TodoScreen() {
   const [task, setTask] = useState('');
   const [tasks, setTasks] = useState([]);
 
-  const addTask = () => {
+  useEffect(() => {
+    // Real-time listener for Firestore
+    const unsubscribe = onSnapshot(collection(db, 'todos'), (snapshot) => {
+      const tasksData = [];
+      snapshot.forEach((doc) => {
+        tasksData.push({ id: doc.id, ...doc.data() });
+      });
+      setTasks(tasksData);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
+
+  const addTask = async () => {
     if (task.trim().length > 0) {
-      setTasks([...tasks, { id: Date.now().toString(), value: task }]);
-      setTask('');
+      try {
+        await addDoc(collection(db, 'todos'), { value: task });
+        setTask(''); // Clear input after adding
+      } catch (error) {
+        console.error('Error adding task: ', error);
+      }
     }
   };
 
-  const deleteTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  const deleteTask = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'todos', id));
+    } catch (error) {
+      console.error('Error deleting task: ', error);
+    }
   };
 
   return (
