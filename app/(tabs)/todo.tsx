@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { Feather } from '@expo/vector-icons'; // Icons for enhanced visuals
 
 export default function TodoScreen() {
   const [task, setTask] = useState('');
@@ -22,11 +23,14 @@ export default function TodoScreen() {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Enter a task"
+          placeholder="What do you need to do?"
+          placeholderTextColor="#aaa"
           value={task}
           onChangeText={setTask}
         />
-        <Button title="Add" onPress={addTask} />
+        <TouchableOpacity style={styles.addButton} onPress={addTask}>
+          <Feather name="plus" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
       <FlatList
         data={tasks}
@@ -35,10 +39,13 @@ export default function TodoScreen() {
           <View style={styles.taskContainer}>
             <Text style={styles.taskText}>{item.value}</Text>
             <TouchableOpacity onPress={() => deleteTask(item.id)}>
-              <Text style={styles.deleteText}>Delete</Text>
+              <Feather name="trash-2" size={20} color="#ff4d4d" />
             </TouchableOpacity>
           </View>
         )}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No tasks yet. Add some to get started!</Text>
+        }
       />
     </View>
   );
@@ -47,36 +54,70 @@ export default function TodoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingTop: 40,
+    backgroundColor: '#f9f9f9',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
     marginBottom: 20,
   },
   inputContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 20,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+    padding: 10,
   },
   input: {
     flex: 1,
-    borderBottomWidth: 1,
-    marginRight: 10,
-    paddingHorizontal: 8,
+    fontSize: 16,
+    paddingHorizontal: 10,
+    color: '#333',
+  },
+  addButton: {
+    backgroundColor: '#4caf50',
+    padding: 10,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   taskContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   taskText: {
     fontSize: 18,
+    color: '#333',
   },
   deleteText: {
-    color: 'red',
+    color: '#ff4d4d',
     fontWeight: 'bold',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#aaa',
+    fontSize: 16,
+    marginTop: 20,
   },
 });
