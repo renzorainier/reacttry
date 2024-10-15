@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } fr
 import { useNavigation } from "@react-navigation/native";
 import { auth } from './firebaseConfig'; // adjust your firebase config path if needed
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import teen from "../img.png"; // assuming you have this image locally in assets
+import teen from "./img.png"; // assuming you have this image locally in assets
 
 const SignIn = () => {
   const [showGoogleError, setShowGoogleError] = useState(false);
