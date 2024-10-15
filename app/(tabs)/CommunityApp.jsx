@@ -17,7 +17,7 @@ export default function CommunityApp() {
           style={styles.profilePic}
         />
         <View>
-          <Text style={styles.profileName}>Mitchell Barber</Text>
+          <Text style={styles.profileName}>Mitcfasdasdfshell Barber</Text>
           <Text style={styles.profileLocation}>Jakarta, Indonesia</Text>
         </View>
         <TouchableOpacity style={styles.connectButton}>
