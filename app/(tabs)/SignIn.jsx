@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { auth } from "../firebase/config"; // adjust your firebase config path if needed
+import { auth } from './firebaseConfig'; // adjust your firebase config path if needed
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import teen from "../img.png"; // assuming you have this image locally in assets
 
