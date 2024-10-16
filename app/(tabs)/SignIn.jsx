@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { auth } from './firebaseConfig'; // adjust your firebase config path if needed
+import { auth } from './firebaseConfig'; // Updated path to the Firebase config in the app folder
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import teen from "./img.png"; // assuming you have this image locally in assets
+import img from './img.png'; // Adjusted path for image
 
 const SignIn = () => {
   const [showGoogleError, setShowGoogleError] = useState(false);
@@ -16,11 +16,11 @@ const SignIn = () => {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
       await signInWithPopup(auth, provider);
-      navigation.navigate("Home"); // Replace with your home screen
+      navigation.replace("MainScreen");  // Redirect to MainScreen after successful sign-in
     } catch (e) {
       console.error(e);
       setShowGoogleError(true);
-      setTimeout(() => setShowGoogleError(false), 3000); // Clear the error message after 3 seconds
+      setTimeout(() => setShowGoogleError(false), 3000);  // Clear error message after 3 seconds
     } finally {
       setGoogleLoading(false);
     }
@@ -29,13 +29,13 @@ const SignIn = () => {
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <Image source={teen} style={styles.image} />
+        <Image source={img} style={styles.image} />
       </View>
 
       <View style={styles.content}>
         {showGoogleError && (
           <Text style={styles.errorText}>
-            Error with Google Sign-In. Please make sure to use your school Gmail account.
+            Error with Google Sign-In. Please use your school Gmail account.
           </Text>
         )}
 
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "linear-gradient(to right, #035172, #0587be)",
+    backgroundColor: "#035172",  // Changed background to a solid color
   },
   imageContainer: {
     justifyContent: "center",
@@ -80,6 +80,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     width: "90%",
+    marginTop: 20,
   },
   errorText: {
     color: "red",
